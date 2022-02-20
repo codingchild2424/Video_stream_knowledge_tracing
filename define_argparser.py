@@ -19,16 +19,14 @@ def define_argparser():
     p.add_argument('--dataset_name', type=str, default = 'assist2015')
     p.add_argument('--crit', type=str, default = 'binary_cross_entropy')
 
+    #autoencoder argument
+    p.add_argument('--ae_emb_size', type=int, default = 50)
+    p.add_argument('--ae_hidden_size', type=int, default = 50)
+    p.add_argument('--ae_crit', type=str, default = 'mse_loss')
+
     #dkt argument
     p.add_argument('--dkt_emb_size', type=int, default = 100)
     p.add_argument('--dkt_hidden_size', type=int, default = 100)
-
-    #dkt+ argument
-    p.add_argument('--dkt_plus_emb_size', type=int, default = 100)
-    p.add_argument('--dkt_plus_hidden_size', type=int, default = 100)
-    p.add_argument('--dkt_plus_lambda_r', type=int, default = 0.01)
-    p.add_argument('--dkt_plus_lambda_w1', type=int, default = 0.003)
-    p.add_argument('--dkt_plus_lambda_w2', type=int, default = 3.0)
 
     #dkvmn argument
 

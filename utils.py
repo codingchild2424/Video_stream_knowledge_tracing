@@ -3,7 +3,33 @@ from torch.nn.utils.rnn import pad_sequence
 
 from torch.optim import SGD, Adam
 
-from torch.nn.functional import binary_cross_entropy
+from torch.nn.functional import binary_cross_entropy, mse_loss
+
+#여기서 받는 것은 
+def video_stream_collate_fn(batches, pad_val=0):
+
+    collated_batches = []
+
+    for batch in batches:
+        collated_batches.append(torch.Tensor(batch))
+
+    collated_batches = pad_sequence(
+        collated_batches, batch_first = True, padding_value = pad_val
+    )
+
+    mask_seqs = (collated_batches != pad_val)
+
+    collated_batches = collated_batches * mask_seqs
+
+    return collated_batches #, mask_seqs
+
+    #각 원소가 -1이 아니면 Ture, -1이면 False로 값을 채움
+    #이후 (q_seqs != pad_val)과 (qshft_seqs != pad_val)을 곱해줌 => 그러면 qshft가 -1이 하나 더 많을 것이므로, qshft 기준으로 True 갯수가 맞춰짐
+    #mask_seqs는 실제로 문항이 있는 경우만을 추출하기 위해 사용됨(실제 문항이 있다면, True, 아니면 False, pad_val은 전체 길이를 맞춰주기 위해 사용됨)
+    # mask_batch = batches != pad_val
+
+    # #즉 전체를 qshft_seqs의 -1이 아닌 갯수만큼은 true(1)을 곱해서 원래 값을 부여하고, 아닌 것은 False(0)을 곱해서 0으로 만듦
+    # batches = batches * mask_batch
 
 def collate_fn(batch, pad_val=-1):
 
@@ -61,6 +87,10 @@ def get_optimizers(model, config):
 
     return optimizer
 
+def get_AE_optimizer(model, config):
+    optimizer = Adam(model.parameters(), config.learning_rate)
+    return optimizer
+
 #get_crit 정의
 def get_crits(config):
     if config.crit == "binary_cross_entropy":
@@ -68,5 +98,11 @@ def get_crits(config):
     #-> 추가적인 criterion 설정
     else:
         print("Wrong criterion was used...")
+
+    return crit
+
+def get_AE_crits(config):
+    if config.ae_crit == "mse_loss":
+        crit = mse_loss
 
     return crit

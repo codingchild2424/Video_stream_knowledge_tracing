@@ -40,7 +40,8 @@ class DKT(Module):
         )
 
     def forward(self, q_seqs, r_seqs):
-        #|q_seqs| = (bs, sq), |r_seqs| = (bs, sq)
+        #|q_seqs| = (bs, sq) -> [[58., 58., 58., -0., -0., -0., -0., ...], [58., 58., 58., -0., -0., -0., -0., ...]...]
+        #|r_seqs| = |r_seqs| = (bs, sq) -> [[1., 1., 0., -0., -0., -0., -0., ...], [1., 1., 0., -0., -0., -0., -0., ...]...]
         x = q_seqs + self.num_q * r_seqs #|x| = (bs, sq)
 
         interaction_emb = self.interaction_emb(x) #|interaction_emb| = (bs, sq, self.emb_size) -> 각각의 x에 해당하는 embedding값이 정해짐
