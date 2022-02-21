@@ -21,7 +21,7 @@ def video_stream_collate_fn(batches, pad_val=0):
 
     collated_batches = collated_batches * mask_seqs
 
-    return collated_batches #, mask_seqs
+    return collated_batches, mask_seqs
 
     #각 원소가 -1이 아니면 Ture, -1이면 False로 값을 채움
     #이후 (q_seqs != pad_val)과 (qshft_seqs != pad_val)을 곱해줌 => 그러면 qshft가 -1이 하나 더 많을 것이므로, qshft 기준으로 True 갯수가 맞춰짐

@@ -31,8 +31,20 @@ def main(config):
         config = config
     )
 
+    #6. trainer 훈련
     ae_trainer.train(ae_train_loader, ae_test_loader)
 
+    # #7. model 기록 저장 위치
+    ae_model_path = './train_model_records/' + 'ae_' + config.model_fn
+
+    #8. model 기록
+    torch.save({
+        'model': ae_trainer.model.state_dict(),
+        'config': config
+    }, ae_model_path)
+
+    #autoencoder로 훈련시킨 모델을 활용해서, encoder만을 가져와서 차원을 변환시킨 데이터를 가져옴
+    
 
     #autoencoder 훈련
 
@@ -40,6 +52,10 @@ def main(config):
     
     # #6. train
     # trainer.train(train_loader, test_loader)
+
+
+
+
 
     #1. 데이터 받아오기
     #train_loader, test_loader, num_q = get_loaders(config)

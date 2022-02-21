@@ -52,6 +52,7 @@ class AE(Module):
             ])
         '''
         verb_emb = self.emb_layer(x)
+        #print('verb_emb: ', verb_emb)
 
         """
         verb_emb:  tensor([[[ 0.5335, -0.3515, -0.2204,  ..., -1.2217,  1.1474,  0.0440],
@@ -74,6 +75,8 @@ class AE(Module):
 
         z, _ = self.encoder( verb_emb ) #rnn의 결과값이 두개가 나오므로, 하나를 제거
 
+        #print('z: ', z)
+
         """
         z:  tensor([[[ 0.0445, -0.0322, -0.0400,  ...,  0.0141,  0.0112,  0.0239],
          [ 0.0683, -0.0392, -0.0660,  ...,  0.0073,  0.0210,  0.0463],
@@ -94,6 +97,8 @@ class AE(Module):
         """
 
         y, _ = self.decoder(z)
+
+        #print('y: ', y)
 
         """
         y:  tensor([[[-0.0257, -0.0273, -0.0247,  ...,  0.0244, -0.0081, -0.0540],
