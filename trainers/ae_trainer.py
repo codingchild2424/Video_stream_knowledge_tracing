@@ -32,7 +32,11 @@ class AE_trainer():
             mask_seqs = mask_seqs.to(self.device)
 
             #mask와 y_hat, verb_emb의 사이즈가 다르기 때문에, unsqueeze해서 가장 아래 차원을 늘리고, expand를 사용하여 같은 차원으로 만들어 줌
-            mask_seqs = mask_seqs.unsqueeze(-1).expand(mask_seqs.size()[0], mask_seqs.size()[1], self.config.ae_emb_size)
+            mask_seqs = mask_seqs.unsqueeze(-1).expand(
+                mask_seqs.size()[0], 
+                mask_seqs.size()[1], 
+                self.config.ae_emb_size
+                )
 
             y_hat, verb_emb = self.model( batches.long() )
 
@@ -60,7 +64,11 @@ class AE_trainer():
                 mask_seqs = mask_seqs.to(self.device)
 
                  #mask와 y_hat, verb_emb의 사이즈가 다르기 때문에, unsqueeze해서 가장 아래 차원을 늘리고, expand를 사용하여 같은 차원으로 만들어 줌
-                mask_seqs = mask_seqs.unsqueeze(-1).expand(mask_seqs.size()[0], mask_seqs.size()[1], self.config.ae_emb_size)
+                mask_seqs = mask_seqs.unsqueeze(-1).expand(
+                    mask_seqs.size()[0], 
+                    mask_seqs.size()[1], 
+                    self.config.ae_emb_size
+                    )
 
                 y_hat, verb_emb = self.model( batches.long() )
 
@@ -106,3 +114,48 @@ class AE_trainer():
         
         # 가장 최고의 모델 복구    
         self.model.load_state_dict(best_model)
+
+    #encoder용
+    def dim_reductor(self, data_loader):
+
+        dim_reduct_list = []
+
+        with torch.no_grad():
+            for data in tqdm(data_loader):
+                self.model.eval()
+
+                batches, mask_seqs = data
+                batches = batches.to(self.device)
+                mask_seqs = mask_seqs.to(self.device)
+
+                mask_seqs = mask_seqs.unsqueeze(-1).expand(
+                    mask_seqs.size()[0], 
+                    mask_seqs.size()[1], 
+                    self.config.ae_emb_size
+                    )
+
+                y_hat = self.model.dim_reductor( batches.long() )
+
+                #y_hat = torch.masked_select(y_hat, mask_seqs)
+
+                #torch.masked_select를 사용하면 결과 값의 차원이 1차원으로 변환됨
+                #원하는 것은 차원이 달라지지 않은 형태의 벡터이므로, 
+                
+                y_hat = y_hat * mask_seqs # 이렇게 하면 곱은 가능하지만, 0인 부분이 삭제되지는 않음
+
+                #https://stackoverflow.com/questions/61956893/how-to-mask-a-3d-tensor-with-2d-mask-and-keep-the-dimensions-of-original-vector
+
+                #y_hat의 절대값(abs) 상태에서 마지막 차원의 차원(2) 방향으로 모두 더한 값이 0보다 큰지 아닌지를 담은 벡터
+                #https://stackoverflow.com/questions/60888546/how-can-i-remove-elements-across-a-dimension-that-are-all-zero-with-pytorch
+                nonZeroRows = torch.abs(y_hat).sum(dim=2) > 0
+
+                #이렇게 대입하면, 2차원 형태의 값을 얻을 수 있음
+                y_hat = y_hat[nonZeroRows] #ex) torch.Size([142, 50])
+
+                dim_reduct_list.append(y_hat)
+
+        return dim_reduct_list
+
+
+
+        #최종적인 return 값은 차원이 축소된 벡터들임

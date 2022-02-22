@@ -2,8 +2,6 @@ from torch.nn import Module, LSTM, Embedding
 
 #autoencoder 형태로 구성
 #단 encoder, decoder는 rnn 모델로 구성
-#나중에 사용시에는 encoder만 활용하면 됨
-#https://dodonam.tistory.com/301
 
 class AE(Module):
     
@@ -121,5 +119,12 @@ class AE(Module):
         
         return y, verb_emb
 
-    def coding(self, x):
-        return self.encoder(x)
+    #나중에 사용시에는 encoder만 활용하면 됨
+    #https://dodonam.tistory.com/301
+    def dim_reductor(self, x):
+
+        verb_emb = self.emb_layer(x)
+
+        z, _ = self.encoder( verb_emb )
+
+        return z

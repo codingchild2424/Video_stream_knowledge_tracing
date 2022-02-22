@@ -2,7 +2,7 @@ import torch
 
 from define_argparser import define_argparser
 
-from dataloaders.get_loaders import get_video_stream_loaders
+from dataloaders.get_loaders import get_video_stream_loaders, get_video_stream_loaders_no_split
 from models.get_models import get_AE
 from trainers.get_trainers import get_ae_trainers
 from utils import get_AE_optimizer, get_AE_crits
@@ -43,13 +43,47 @@ def main(config):
         'config': config
     }, ae_model_path)
 
-    #autoencoder로 훈련시킨 모델을 활용해서, encoder만을 가져와서 차원을 변환시킨 데이터를 가져옴
-    
+    #######
+    #9. autoencoder로 훈련시킨 모델을 활용해서, encoder만을 가져와서 차원을 변환시킨 데이터를 가져옴
+    #분리되지 않은 data를 가져오기
+    no_split_dataloader, longest_sq_len = get_video_stream_loaders_no_split(config)
 
-    #autoencoder 훈련
+    trained_ae_model = get_AE(config, longest_sq_len, device) #모델 구조 선언
 
-    #autoencoder의 encoder만 사용하여, 변수의 차원을 축소
-    
+    checkpoint = torch.load( ae_model_path ) #학습된 모델의 경로 가져오기
+
+    trained_ae_model.load_state_dict(
+        checkpoint['model'] #저장된 모델 중에서 model만 가져오기
+    )
+
+    trained_ae_optimizer = get_AE_optimizer(trained_ae_model, config)
+
+    trained_ae_crit = get_AE_crits(config)
+
+    trained_ae_model.eval() #평가모드 활성화
+
+    ae_trainer = get_ae_trainers(
+            model = trained_ae_model,
+            optimizer= trained_ae_optimizer,
+            device = device,
+            crit = trained_ae_crit,
+            config = config
+        )
+
+    dim_reduct_list = ae_trainer.dim_reductor(no_split_dataloader)
+
+    print("dim_reduct_list: ", dim_reduct_list)
+
+    #여기서 나온 값을 정오답 값으로 만들어진 one-hot벡터와 같이 concat하기
+
+    #정오답 값으로 one_hot 만들기
+
+    #concat
+
+    #dkt 모델 훈련
+
+
+
     # #6. train
     # trainer.train(train_loader, test_loader)
 

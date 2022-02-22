@@ -33,3 +33,20 @@ def get_video_stream_loaders(config):
     )
 
     return train_loader, test_loader, longest_sq_len
+
+#autoencoder의 차원축소를 위해 데이터를 나누지 않은 것
+def get_video_stream_loaders_no_split(config):
+
+    video_stream_dataset = Video_stream_loader()
+
+    longest_sq_len = video_stream_dataset.longest_sq_len
+
+    #train, test 데이터 섞기
+    data_loader = DataLoader(
+        video_stream_dataset,
+        batch_size = config.batch_size,
+        shuffle = True,
+        collate_fn = video_stream_collate_fn
+    )
+
+    return data_loader, longest_sq_len
